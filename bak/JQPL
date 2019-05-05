@@ -1,0 +1,151 @@
+# JPQL
+
+1. 支持单个或多个结果数据类型。
+2. 支持聚合函数，包括sort与group语句。
+3. 支持连接查询。
+4. 支持子查询的条件表达式。
+5. 数据批量修改与删除。
+6. 将查询结果映射到非持久化类中。
+
+## SELECT语句
+
+JPQL的SELECT语句并不以数据库表为基础，而是以表对应的实体类为查询基础。
+
+	SELECT e FROM Employee e
+
+该查询语句将返回所有的Employee对象，结果的数据类型为一个包含一个或多个Employee对象的List对象。
+
+同时，还可以通过在SELECT语句中指定对象的属性名来返回对应的字段结果。
+
+	SELECT e.name FROM Employee e
+
+Employee中的name成员为String类型，因此该查询将返回一个包含一个或多个String类型的List对象。
+
+	SELECT e.department FROM Employee e
+
+同理，该查询语句返回的是一个包含Department对象的List对象。
+
+## WHERE语句
+
+JPQL支持各种查询条件语句。
+
+1. 基本的比较符号，如大于、小于等。
+2. IN、LIKE或BETWEEN表达式。
+3. 函数表达式，如SUBSTRING、LENGTH等。
+4. 子查询。
+
+SELECT e FROM Employee e
+WHERE e.department.name = 'NA42' AND
+		e.address.state IN ('NY', 'CA')
+
+## JOIN语句
+
+JPQL中的SELECT语句中不允许出现Collection对象。
+
+	SELECT p.number
+	FROM Employee e, Phone p
+	WHERE e = p.employee AND
+			e.department.name = 'NA42' AND
+			p.type = 'Cell'
+
+JPQL支持多种连接方式，如内连接与外连接等。
+
+	SELECT p.number
+	FROM Employee e JOIN e.phones p
+	WHERE e.department.name = 'NA42' AND
+		p.type = 'Cell'
+
+## 聚合函数
+
+- AVG
+- COUNT
+- MIN
+- MAX
+- SUM
+
+SELECT d, COUNT(e), MAX(e.salary), AVG(e.salary)
+FROM Department d JOIN d.employees e
+GROUP BY d
+HAVING COUNT(e) >= 5
+
+## 查询参数
+
+JPQL支持两种参数绑定语法。
+
+参数位置绑定，形如?1。
+
+SELECT e
+FROM Employee e
+WHERE e.department = ?1 AND
+	e.salary > ?2
+
+- 参数命名绑定，形如:attr。
+
+SELECT e
+FROM Employee e
+WHERE e.department = :dept AND
+	e.salary > :base
+
+# 定义查询
+
+JPQL提供了Query和TypedQuery接口用于设置与执行查询操作。
+
+Query接口用于查询结果类型为Object的情况，而TypedQuery接口用于查询结果为具体对象类型的情况。TypedQuery继承了Query。
+
+JPQL中有两种定义查询的方式
+1. 动态配置。
+2. 在XML等配置文件中配置。
+
+## 动态查询定义
+
+通过传递JPQL查询字符串与期望的结果类型实现查询的动态定义。
+
+## Named Query 定义
+
+@NamedQuery
+
+@NamedQuery(name="findSalaryForNameAndDepartment",
+	query="SELECT e.salary " +
+		"FROM Employee e " +
+		"WHERE e.department.name = :deptName AND " +
+		" e.name = :empName")
+
+@NamedQueries
+
+	@NamedQueries({
+		@NamedQuery(name="Employee.findAll",
+			query="SELECT e FROM Employee e"),
+		@NamedQuery(name="Employee.findByPrimaryKey",
+			query="SELECT e FROM Employee e WHERE e.id = :id"),
+		@NamedQuery(name="Employee.findByName",
+			query="SELECT e FROM Employee e WHERE e.name = :name")
+	})
+
+
+# 参数类型
+
+setParameter()
+
+# 执行查询
+
+getSingleResult()返回单个结果。
+
+getResultList()返回多个结果，当查询返回结果为空时，返回一个空的List。
+
+	List<Employee> result = em.createQuery(
+			"SELECT e " +
+			"FROM Project p JOIN p.employees e "+
+			"WHERE p.name = ?1 " +
+			"ORDER BY e.name",
+			Employee.class)
+		.setParameter(1, projectName)
+		.getResultList();
+
+	int count = 0;
+	for (Employee e : result) {
+		System.out.println(++count + ": " + e.getName() + ", " +
+			e.getDepartment().getName());
+	}
+
+### 查询分页
+

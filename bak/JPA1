@@ -1,0 +1,19 @@
+# 关联关系与@ElementCollection
+
+集合类型可以作为实体类中的成员变量类型。
+
+我们可以在实体类中将其他实体类、内嵌实体或基本类型的集合类型变量映射到数据库中。
+
+实体类中内嵌类型和基本类型的集合变量并不会被映射为数据库中的关联关系。
+
+@ElementCollection
+
+@CollectionTable
+
+@AttributeOverride
+
+## Maps
+
+@MapKeyColumn
+
+@Enumerated / @MapKeyEnumerated
