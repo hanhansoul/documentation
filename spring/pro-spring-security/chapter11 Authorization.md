@@ -1,0 +1,51 @@
+http://www.importnew.com/26712.html
+
+## Authentication接口
+
+Authentication是spring security包中的接口，直接继承自Principal类，而Principal是位于java.security包中的。由此可见，Authentication在spring security中是最高级别的身份/认证的抽象。
+
+由这个顶级接口，我们可以得到用户拥有的权限信息列表，密码，用户细节信息，用户身份信息，认证信息。
+
+
+authentication.getPrincipal()返回了一个Object，我们将Principal强转成了Spring Security中最常用的UserDetails，这在Spring Security中非常常见，接口返回Object，使用instanceof判断类型，强转成对应的具体实现类。接口详细解读如下：
+
+1. getAuthorities()：权限信息列表，默认是GrantedAuthority接口的一些实现类，通常是代表权限信息的一系列字符串。
+2. getCredentials()：密码信息，用户输入的密码字符串，在认证过后通常会被移除，用于保障安全。
+3. getDetails()：细节信息，web应用中的实现接口通常为 WebAuthenticationDetails，它记录了访问者的ip地址和sessionId的值。
+4. getPrincipal()：最重要的身份信息，大部分情况下返回的是UserDetails接口的实现类，也是框架中的常用接口之一。
+
+## AuthenticationManager
+
+AuthenticationManager接口是认证相关的核心接口，也是发起认证的出发点，因为在实际需求中，我们可能会允许用户使用用户名+密码登录，同时允许用户使用邮箱+密码，手机号码+密码登录，甚至，可能允许用户使用指纹登录，所以说AuthenticationManager一般不直接认证。
+
+AuthenticationManager接口的常用实现类ProviderManager 内部会维护一个List<AuthenticationProvider>列表，存放多种认证方式，实际上这是委托者模式的应用（Delegate）。也就是说，核心的认证入口始终只有一个：AuthenticationManager，不同的认证方式：用户名+密码（UsernamePasswordAuthenticationToken），邮箱+密码，手机号码+密码登录则对应了三个AuthenticationProvider。
+
+熟悉shiro的朋友可以把AuthenticationProvider理解成Realm。在默认策略下，只需要通过一个AuthenticationProvider的认证，即可被认为是登录成功。
+
+ProviderManager中的List，会依照次序去认证，认证成功则立即返回，若认证失败则返回null，下一个AuthenticationProvider会继续尝试认证，如果所有认证器都无法认证成功，则ProviderManager会抛出一个ProviderNotFoundException异常。
+
+认证相关的核心类：
+1. 身份信息的存放容器SecurityContextHolder
+2. 身份信息的抽象Authentication
+3. 身份认证器AuthenticationManager及其认证流程。
+
+## DaoAuthenticationProvider
+
+AuthenticationProvider最常用的一个实现便是DaoAuthenticationProvider。顾名思义，Dao正是数据访问层的缩写，也暗示了这个身份认证器的实现思路。
+
+## UserDetails与UserDetailsService
+
+UserDetails接口代表了最详细的用户信息，这个接口涵盖了一些必要的用户信息字段，具体的实现类对它进行了扩展。
+
+它和Authentication接口很类似，比如它们都拥有username，authorities，区分他们也是本文的重点内容之一。
+
+Authentication的getCredentials()与UserDetails中的getPassword()需要被区分对待，前者是用户提交的密码凭证，后者是用户正确的密码，认证器其实就是对这两者的比对。
+
+Authentication中的getAuthorities()实际是由UserDetails的getAuthorities()传递而形成的。Authentication接口中的getUserDetails()方法中的UserDetails用户详细信息便是经过了AuthenticationProvider之后被填充的。
+
+UserDetailsService和AuthenticationProvider两者的职责常常被人们搞混，记住一点即可，UserDetailsService只负责从特定的地方（通常是数据库）加载用户信息，仅此而已。
+
+UserDetailsService常见的实现类有JdbcDaoImpl，InMemoryUserDetailsManager，前者从数据库加载用户，后者从内存中加载用户，也可以自己实现UserDetailsService，通常这更加灵活。
+
+# chapter11 Authorization
+
