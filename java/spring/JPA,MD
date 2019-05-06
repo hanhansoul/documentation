@@ -1,0 +1,63 @@
+## WHERE语句
+
+### 输入参数
+
+1. 位置参数：SELECT e FROM Employee e WHERE e.salary > ?1
+2. 命名参数：SELECT e FROM Employee e WHERE e.salary > :sal
+
+### 基本表达式形式
+
+### BETWEEN
+### LIKE
+
+### 子查询
+
+子查询是指条件表达式中一个完成的SELECT语句。
+
+# Criteria API
+
+	SELECT e FROM Employee e WHERE e.name = 'John Smith'
+
+等价于
+
+	CriteriaBuilder cb = em.getCriteriaBuilder();
+	CriteriaQuery<Employee> c = cb.createQuery(Employee.class);
+	Root<Employee> emp = c.from(Employee.class);
+	c.select()
+
+
+## CrudRepository
+
+CrudRepository提供了公共的通用CRUD方法。
+
+	public interface CrudRepository<T, ID extends Serializable> {
+		<S extends T> S save(S entity);
+		<S extends T> Iterable<S> save(Iterable<S> entities);
+		T findOne(ID id);
+		boolean exists(ID id);
+		Iterable<T> findAll();
+		Iterable<T> findAll(Iterable<ID> ids);
+		long count();
+		void delete(ID id);
+		void delete(T entity);
+		void delete(Iterable<? extends T> entities);
+		void delelteAll();
+	}
+
+## PagingAndSortingRepository
+
+继承了CrudRepository所有基本方法，增加了分页和排序等功能。
+
+	Iterable<T> findAdd(Sort sort);
+	Page<T> findAll(Pageable pageable);
+
+## JpaRepository
+
+1. 通知
+2. 连接点 <===> 切入点
+3. 切面 = 切入点 + 切面
+4. 引入：允许向现有的类添加新的方法属性。
+5. 目标
+6. 代理
+8. 织入
+	
