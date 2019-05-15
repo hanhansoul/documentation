@@ -8,6 +8,59 @@
 
 ## 基于数据库的认证服务提供者
 
+基于数据库的认证机制使用的AuthenticationProvider实现类为DaoAuthenticationProvider，该实现是基于一个用于获取用户信息的UserDetailService抽象，因此与基于内存的认证区别在于UserDetailService具体实现。
+
+web.xml
+
+	<?xml version="1.0" encoding="UTF-8"?>
+	<web-app>
+		<listener>
+			<listener-class>
+				org.springframework.web.context.ContextLoaderListener
+			</listener-class>
+		</listener>
+
+		<context-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>
+				/WEB-INF/applicationContext-security.xml
+			</param-value>
+		</context-param>
+
+		<filter>
+			<filter-name>springSecurityFilterChain</filter-name>
+			<filter-class>
+				org.springframework.web.filter.DelegatingFilterProxy
+			</filter-class>
+		</filter>
+
+		<filter-mapping>
+			<filter-name>springSecurityFilterChain</filter-name>
+			<url-pattern>/*</url-pattern>
+		</filter-mapping>
+	</web-app>
+
+applicationContext-security.xml
+
+	<security:http auto-config="true">
+		<security:intercept-url pattern="/*" access="ROLE_SCARVAREZ_MEMBER" />
+		<security:form-login/>
+	</security:http>
+
+	<security:authentication-manager>
+		<security:authentication-provider>
+			<security:jdbc-user-service data-source-ref="dataSource" />
+		</security:authentication-provider>
+	</security:authentication-manager>
+
+	<jdbc:embedded-database id="dataSource">
+		<jdbc:script location="classpath:security-schema.sql"/>
+		<jdbc:script location="classpath:users.sql"/>
+	</jdbc:embedded-database>
+
+
+
+
 ## LDAP认证
 
 LDAP（Lightweight Directory Access Protocol），即轻量目录访问协议。
