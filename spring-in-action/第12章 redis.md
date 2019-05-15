@@ -63,3 +63,5 @@ Set操作：
 4. JdkSerializationRedisSerializer
 5. OxmSerializer
 6. StringRedisSerializer
+
+RedisTemplate使用JdkSerializationRedisSerializer，String
