@@ -24,3 +24,71 @@
 	2. sid：SID的名称，可以为principal的用户名、角色名等
 
 实际应用中，权限掩码并不会组合不同的增删查改权限为一个掩码，而是分别存储并由系统组合处理，如由DefaultPermissionGrantingStrategy对象负责处理给定对象的权限。
+
+## 配置
+
+	<!-- 数据源 -->
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+		<property name="url" value="jdbc:hsqldb:mem:aclexample"/>
+		<property name="username" value="sa"/>
+		<property name="password" value=""/>
+	</bean>
+
+	<!-- JdbcTemplate-->
+	<bean id="jdbcTemplate"
+	class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<!-- 事务管理 -->
+	<bean id="transactionManager"
+	class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager" />
+
+	<!-- 缓存 -->
+	<bean id="aclCache" class="org.springframework.security.acls.domain.EhCacheBasedAclCache">
+		<constructor-arg>
+			<bean class="org.springframework.cache.ehcache.EhCacheFactoryBean">
+				<property name="cacheManager">
+					<bean class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"/>
+				</property>
+				<property name="cacheName" value="aclCache"/>
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<!-- lookup strategy -->
+	<bean id="lookupStrategy" class="org.springframework.security.acls.jdbc.BasicLookupStrategy">
+		<constructor-arg ref="dataSource"/>
+		<constructor-arg ref="aclCache"/>
+		<constructor-arg ref="aclAuthorizationStrategy"/>
+		<constructor-arg>
+			<bean class="org.springframework.security.acls.domain.ConsoleAuditLogger"/>
+		</constructor-arg>
+	</bean>
+
+	<bean id="aclAuthorizationStrategy"
+		class="org.springframework.security.acls.domain.AclAuthorizationStrategyImpl">
+		<constructor-arg>
+			<list>
+				<bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+					<constructor-arg value="ROLE_ADMIN"/>
+				</bean>
+				<bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+					<constructor-arg value="ROLE_ADMIN "/>
+				</bean>
+				<bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+					<constructor-arg value="ROLE_ADMIN "/>
+				</bean>
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="aclService" class="org.springframework.security.acls.jdbc.JdbcMutableAclService">
+		<constructor-arg ref="dataSource"/>
+		<constructor-arg ref="lookupStrategy"/>
+		<constructor-arg ref="aclCache"/>
+	</bean>
