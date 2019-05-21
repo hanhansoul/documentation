@@ -1,0 +1,13 @@
+- synchronized实现原理
+- synchronized的锁优化，偏向锁、轻量级锁、重量级锁
+- AQS实现原理
+- 锁的类型
+- CAS实现原理、参数含义、缺陷与解决方案
+	- https://segmentfault.com/a/1190000015239603
+- ConcurrentHashMap在jdk8中的实现原理
+- ConcurrentHashMap中size()方法的原理
+	- https://blog.csdn.net/chenyiminnanjing/article/details/82716180
+	- 在JDK1.7中，第一种方案他会使用不加锁的模式去尝试多次计算ConcurrentHashMap的size，最多三次，比较前后两次计算的结果，结果一致就认为当前没有元素加入，计算的结果是准确的。第二种方案是如果第一种方案不符合，他就会给每个Segment加上锁，然后计算ConcurrentHashMap的size返回。
+	- 在jdk1.8中，通过对baseCount和counterCell进行CAS计算获得size。ConcurrentHashMap提供了baseCount、counterCells两个辅助变量和一个CounterCell辅助内部类。sumCount()就是迭代counterCells来统计sum的过程。put操作时，肯定会影响size()，在put()方法最后会调用addCount()方法。
+- 死锁[https://blog.csdn.net/wljliujuan/article/details/79614019#%E4%B8%80%E4%BB%80%E4%B9%88%E6%98%AF%E6%AD%BB%E9%94%81]
+- JMM（java内存模型）
