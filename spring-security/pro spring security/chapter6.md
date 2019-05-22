@@ -59,8 +59,6 @@ applicationContext-security.xml
 	</jdbc:embedded-database>
 
 
-
-
 ## LDAP认证
 
 LDAP（Lightweight Directory Access Protocol），即轻量目录访问协议。
@@ -79,7 +77,7 @@ LDAP（Lightweight Directory Access Protocol），即轻量目录访问协议。
 
 与关系型数据库相比，目录服务最大的优点就是读取性能极高。但是，目录服务的写入性能就非常差了，而且不支持事务处理等容错功能，因此不适合频繁修改数据。
 
-在现实世界中，资源的分布形式很多都是树状的、有层次的。因此，目录服务有着非常广泛的用途。像企业员工信息、企业设备信息、证书公钥等具有层次性、且不需要频繁改写的数据都适合使用目录服务来存储。X.500是ISO制定的一套目录服务的标准，它是一个协议族，定义了一个机构如何在全局范围内共享名称和与名称相关联的对象。通过它，可以将局部的目录服务连接起来，构建基于Internet的分布在全球的目录服务系统，而目录访问协议（DAP）是 X.500 的核心组成之一。
+在现实世界中，资源的分布形式很多都是树状的、有层次的。因此，目录服务有着非常广泛的用途。像企业员工信息、企业设备信息、证书公钥等具有层次性、且不需要频繁改写的数据都适合使用目录服务来存储。X.500是ISO制定的一套目录服务的标准，它是一个协议族，定义了一个机构如何在全局范围内共享名称和与名称相关联的对象。通过它，可以将局部的目录服务连接起来，构建基于Internet的分布在全球的目录服务系统，而目录访问协议（DAP）是X.500的核心组成之一。
 
 LDAP 协议的主要特点如下：
 
@@ -98,5 +96,32 @@ LDAP的四大模型：
 3. 功能模型：规定了可以对LDAP目录进行的操作（如查询、更新、认证等）。
 4. 安全模型：规定了保护LDAP目录中的数据的安全措施。
 
-## LDAP结构
+### LDAP结构
 
+## OpenID
+
+OpenID用于单点登录的验证功能。
+
+OpenID是一个身份认证机制，不包含任何权限控制功能。
+
+### 配置OpenID认证
+
+	<security:http auto-config="true">
+		<security:intercept-url pattern="/*" access="ROLE_ADMINISTRATOR" />
+		<security:openid-login/>
+	</security:http>
+
+	<security:user-service id="userService">
+		<security:user name="http://carlo8172.myopenid.com/" authorities="ROLE_ADMINISTRATOR"/>
+	</security:user-service>
+
+	<security:authentication-manager alias="authenticationManager"/>
+
+`<security:openid-login/>`为spring提供了一个OpenIDAuthenticationFilter和OpenIDAuthenticationProvider，同时将对应的UserDetailsService实现注入到AuthenticationManager中。
+
+<security:user-service>中提供了OpenID账户的用户名。
+
+### OpenID流程
+
+1. /spring_security_login由DefaultLoginPageGeneratingFilter创建。登录页面上包含一个`<form name="" action="/j_spring_openid_security_check" method="POST">`。
+2. 登录时，请求被发送给OpenIDAuthenticationFilter
