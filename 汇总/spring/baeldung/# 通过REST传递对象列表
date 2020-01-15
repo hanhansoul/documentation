@@ -1,0 +1,62 @@
+# 通过RestTemplate传递对象列表
+
+## 通过RestTemplate获取对象列表
+
+	getForObject(URI url, Class<T> responseType)
+
+getForObject将请求传递给指定URI并将响应体转换为给定的Java类型，但是该方法不能传递对象列表。
+
+这是因为泛型的擦除机制。列表中的数据无法被反序列化为恰当的类型。
+
+### ParameterizedTypeReference
+
+	RestTemplate restTemplate = new RestTemplate();
+	ResponseEntity<List<Employee>> response = restTemplate.exchange(
+	  "http://localhost:8080/employees/",
+	  HttpMethod.GET,
+	  null,
+	  new ParameterizedTypeReference<List<Employee>>(){});
+	List<Employee> employees = response.getBody();
+
+### 封装类
+
+	public class EmployeeList {
+	    private List<Employee> employees;
+	 
+	    public EmployeeList() {
+	        employees = new ArrayList<>();
+	    }
+	 
+	    // standard constructor and getter/setter
+	}
+
+	EmployeeList response = restTemplate.getForObject(
+	  "http://localhost:8080/employees",
+	  EmployeeList.class);
+	List<Employee> employees = response.getEmployees();
+
+## 通过RestTemplate发送对象列表
+
+由于RestTemplate是将对象转换为一个JSON对象，因此不存在泛型类型擦除的问题。
+
+	List<Employee> newEmployees = new ArrayList<>();
+	newEmployees.add(new Employee(3, "Intern"));
+	newEmployees.add(new Employee(4, "CEO"));
+	 
+	restTemplate.postForObject(
+	  "http://localhost:8080/employees/",
+	  newEmployees,
+	  ResponseEntity.class);
+
+### 封装类
+
+也可以通过封装类与GET保持一致。
+
+	List<Employee> newEmployees = new ArrayList<>();
+	newEmployees.add(new Employee(3, "Intern"));
+	newEmployees.add(new Employee(4, "CEO"));
+	 
+	restTemplate.postForObject(
+	  "http://localhost:8080/employees",
+	  new EmployeeList(newEmployees),
+	  ResponseEntity.class);

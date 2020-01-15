@@ -1,0 +1,4 @@
+# MockMvc测试REST接口
+
+通过RestAssuredMockMvc对Spring的RESTful风格Controller进行测试。
+

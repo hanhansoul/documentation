@@ -1,0 +1,80 @@
+# RestTemplate拦截器
+
+## RestTemplate拦截器应用场景
+
+- 请求与响应日志
+- 请求重试策略
+- 基于请求参数的请求拒绝策略
+- 修改请求的URL地址
+
+## 创建一个拦截器
+
+ClientHttpRequestInterceptor
+
+
+
+	public class RestTemplateHeaderModifierInterceptor
+	  implements ClientHttpRequestInterceptor {
+	 
+	    @Override
+	    public ClientHttpResponse intercept(
+	      HttpRequest request, 
+	      byte[] body, 
+	      ClientHttpRequestExecution execution) throws IOException {
+	  
+	        ClientHttpResponse response = execution.execute(request, body);
+	        response.getHeaders().add("Foo", "bar");
+	        return response;
+	    }
+	}
+
+## 配置RestTemplate
+
+	@Configuration
+	public class RestClientConfig {
+	 
+	    @Bean
+	    public RestTemplate restTemplate() {
+	        RestTemplate restTemplate = new RestTemplate();
+	 
+	        List<ClientHttpRequestInterceptor> interceptors
+	          = restTemplate.getInterceptors();
+	        if (CollectionUtils.isEmpty(interceptors)) {
+	            interceptors = new ArrayList<>();
+	        }
+	        interceptors.add(new RestTemplateHeaderModifierInterceptor());
+	        restTemplate.setInterceptors(interceptors);
+	        return restTemplate;
+	    }
+	}
+
+## 测试
+
+	public class RestTemplateItegrationTest {
+	     
+	    @Autowired
+	    RestTemplate restTemplate;
+	 
+	    @Test
+	    public void givenRestTemplate_whenRequested_thenLogAndModifyResponse() {
+	        LoginForm loginForm = new LoginForm("username", "password");
+	        HttpEntity<LoginForm> requestEntity
+	          = new HttpEntity<LoginForm>(loginForm);
+	        HttpHeaders headers = new HttpHeaders();
+	        headers.setContentType(MediaType.APPLICATION_JSON);
+	         
+	        ResponseEntity<String> responseEntity
+	          = restTemplate.postForEntity(
+	            "http://httpbin.org/post", requestEntity, String.class
+	          );
+	         
+	        assertThat(
+	          responseEntity.getStatusCode(),
+	          is(equalTo(HttpStatus.OK))
+	        );
+	        assertThat(
+	          responseEntity.getHeaders().get("Foo").get(0),
+	          is(equalTo("bar"))
+	        );
+	    }
+	}

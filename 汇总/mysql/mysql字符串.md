@@ -1,0 +1,42 @@
+# mysql字符串
+
+二进制字符串
+- BINARY
+- VARBINARY
+- BLOB
+
+非二进制字符串
+- CHAR
+- VARCHAR
+- TEXT
+
+## 字符串数据类型
+
+- BINARY/CHAR：255
+- VARBINARY/VARCHAR：65535
+- TINYBLOB/TINYTEXT：255
+- BLOB/TEXT：65535
+- MEDIUMBLOB/MEDIUMTEXT：16777215
+- LONGBLOB/LONGTEXT：4294967295
+
+- UPPER() / LOWER()
+- CONCAT()
+- LEFT() / RIGHT() / MID()
+- SUBSTRING() / SUBSTRING_INDEX()
+- LOCATE()：确定一个字符串中是否含有某个子串
+- FULLTEXT：使用FULLTEXT索引查询
+
+## FULLTEXT
+
+对于大量文本或者多列，可以使用FULLTEXT查询替代模式匹配。
+
+首先给表加上FULLTEXT索引，然后使用MATCH操作符查询作为索引的列。
+
+FULLTEXT索引可以作用于MyISAM表中的非二进制类型字符串。
+
+	ALTER TABLE kjv ADD FULLTEXT (vtext)
+
+	SELECT COUNT(*) FROM kjv WHERE MATCH(vtext) AGAINST('Mizraim')
+
+默认情况下，搜索引擎不会将少于4个字母的单次包括在FULLTEXT索引内。
+
