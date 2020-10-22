@@ -1,0 +1,20 @@
+https://www.cnblogs.com/cnlg123/p/7762889.html
+
+https://www.cnblogs.com/jwentest/p/12520378.html
+
+https://segmentfault.com/a/1190000021127791?utm_source=tag-newest
+
+https://github.com/qbox/stack-hw/blob/master/Makefile
+
+https://www.cnblogs.com/K-artorias/p/13766411.html
+
+	go env -w GOPRIVATE=github.com/qbox/stack
+	go mod download
+	go install ./...
+
+	go get ... -x
+	go mod download -x
+
+	git config --global url."git@github.com:".insteadOf "https://github.com/"
+
+	git config credential.helper store
